@@ -18,7 +18,9 @@ in **tabs of an existing window** rather than spawning new windows.
 1. Save the script somewhere, e.g.:
 
 mkdir -p ~/.local/bin
+
 cp nemo_wrapper.sh ~/.local/bin/
+
 chmod +x ~/.local/bin/nemo_wrapper.sh
 
 ##  Replace system-wide Nemo command (optional):
