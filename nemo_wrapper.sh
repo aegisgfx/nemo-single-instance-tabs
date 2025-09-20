@@ -12,11 +12,24 @@ else
     TARGETS=("$@")
 fi
 
-# Convert each target to absolute file:// URI
 URIS=()
 for target in "${TARGETS[@]}"; do
-    ABS_PATH=$(realpath "$target")
-    URIS+=("file://$ABS_PATH")
+    case "$target" in
+        computer://*|computer|computer:)
+            URIS+=("computer:///")
+            ;;
+        network://*|network|network:)
+            URIS+=("network:///")
+            ;;
+        trash://*|trash|trash:)
+            URIS+=("trash:///")
+            ;;
+        *)
+            # Normal filesystem path → convert to absolute file:// URI
+            ABS_PATH=$(realpath "$target")
+            URIS+=("file://$ABS_PATH")
+            ;;
+    esac
 done
 
 # Open each as its own tab in the existing window
