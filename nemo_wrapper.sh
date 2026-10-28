@@ -1,39 +1,32 @@
 #!/bin/bash
-# Wrapper script for Nemo: always open in an existing window as new tabs.
+# Nemo Single-Instance Tabs.
+#
+# Installed as /usr/local/bin/nemo so that it shadows /usr/bin/nemo and every
+# launch of "nemo" lands in a tab of the existing window.
+#
+# Nemo has no preference for "always open launches in the same window", so the
+# only thing this does is re-invoke the real binary with the documented
+# --existing-window -t flags.
 
-set -e
+REAL_NEMO=/usr/bin/nemo
 
-NEMO_BIN="/usr/bin/nemo"
-
-# If no args given, default to current working dir
-if [ "$#" -eq 0 ]; then
-    TARGETS=("$PWD")
-else
-    TARGETS=("$@")
+if [ ! -x "$REAL_NEMO" ]; then
+    echo "nemo-tabs: $REAL_NEMO is missing or not executable" >&2
+    exit 127
 fi
 
-URIS=()
-for target in "${TARGETS[@]}"; do
-    case "$target" in
-        computer://*|computer|computer:)
-            URIS+=("computer:///")
-            ;;
-        network://*|network|network:)
-            URIS+=("network:///")
-            ;;
-        trash://*|trash|trash:)
-            URIS+=("trash:///")
-            ;;
-        *)
-            # Normal filesystem path → convert to absolute file:// URI
-            ABS_PATH=$(realpath "$target")
-            URIS+=("file://$ABS_PATH")
-            ;;
+# Options are none of our business. --help, --version, --quit, --fix-cache,
+# --geometry, -n, --no-desktop … all get forwarded with the command line intact.
+for arg in "$@"; do
+    case "$arg" in
+        -*) exec "$REAL_NEMO" "$@" ;;
     esac
 done
 
-# Open each as its own tab in the existing window
-for uri in "${URIS[@]}"; do
-    "$NEMO_BIN" --existing-window -t "$uri"
-done
+# No operands: keep the historical behaviour of using the caller's directory.
+[ "$#" -eq 0 ] && set -- "$PWD"
 
+# Nemo accepts plain paths and URIs alike, so pass operands through untouched.
+# No file:// rewriting: that avoids realpath() following symlinks and avoids
+# %-encoding damage to paths containing '%'.
+exec "$REAL_NEMO" --existing-window -t "$@"
