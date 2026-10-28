@@ -13,6 +13,8 @@ re-invokes the real binary with the documented `--existing-window -t` flags.
 - `nemo /usr /etc` opens both, as two tabs, from a single call.
 - `nemo` with no arguments opens the **current working directory** as a tab.
 - URIs such as `computer:///`, `trash:///` and `file:///…` pass straight through.
+- Folder icons on the desktop open as tabs as well, including the special Home
+  and Trash icons.
 - Options are untouched: `nemo --help`, `--version`, `--quit`, `-n`, `--geometry`
   and `--fix-cache` all behave exactly as before.
 
@@ -23,18 +25,22 @@ being guessed at as file paths.
 ## What it does not do
 
 It only affects launches that go through `exec` of `nemo` via `PATH`: the app
-menu, the dock, desktop shortcuts, `xdg-open`, and terminal invocations.
+menu, the dock, desktop icons, `xdg-open`, and terminal invocations.
 
-It cannot affect folder opens handled *inside* a running Nemo process — for
-example `org.freedesktop.FileManager1.ShowFolders` ("open containing folder"
-in other apps) or a folder double-clicked on the desktop. Those decisions happen
-inside Nemo, below the wrapper. Only a patch to Nemo itself would reach them.
+It cannot affect folder opens handled *inside* an already-running Nemo process.
+The main example is `org.freedesktop.FileManager1.ShowFolders`, which is what
+"open containing folder" in another application calls. That decision is made
+below the wrapper, inside Nemo, so only a patch to Nemo itself would reach it.
 
 ## Requirements
 
 - Nemo with `/usr/bin/nemo` and the `--existing-window` and `-t` options.
 - `bash`.
 - Root for install, because it writes to `/usr/local/bin`.
+
+Tested on Nemo 6.6.3 under Cinnamon (Linux Mint). The app menu, the dock,
+terminal invocations, and desktop icons — Home, Trash and ordinary folders —
+were all verified to open as tabs in the existing window.
 
 ## Install
 
